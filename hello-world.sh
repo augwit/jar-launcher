@@ -32,7 +32,7 @@ start_jar()
   PID=$(ps -ef | grep $PATH_TO_JAR | grep -v 'grep' | awk '{print $2}')
   if [ -z "$PID" ]; then
        echo "Starting $SERVICE_NAME ..."
-       nohup java -jar $PATH_TO_JAR /tmp 2>> /dev/null >>/dev/null &
+       nohup java -jar $PATH_TO_JAR >/dev/null 2>$BASE_DIR/log &
                    PID=$(echo $!)
        sleep 1
        echo "$SERVICE_NAME started in process $PID ..."
