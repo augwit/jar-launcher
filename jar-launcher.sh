@@ -1,45 +1,49 @@
 #!/bin/sh
-#===================================================================
-#company  :Augwit
-#author   :Benjamin Qin
-#email    :benjamin.qin@augwit.com
-#usage    :bash example.sh start/stop/restart
-#note     :Bash script to start, stop or restart a java application.
-#===================================================================
+#==============================================================================
+# company  :Augwit
+# author   :Benjamin Qin
+# email    :benjamin.qin@augwit.com
+# usage    :
+#   bash jar-launcher.sh [command]
+#   command: start/stop/restart to start, stop or restart the java application.
+#==============================================================================
 
-CONFIG_FILE_NAME="jar-launcher.conf"
 #You can change the config file name if you want.
 #But in most cases, you don't need to do that.
+CONFIG_FILE_NAME="jar-launcher.conf"
 
-#Please don't change this file.
+#Normally you don't need to change below lines.
+echox() {
+  if [ "$(uname)" == "Darwin" ]; then
+    echo $1
+  else
+    echo -e $1
+  fi
+}
 
 if command -v realpath &> /dev/null
 then
   BASE_DIR=$(dirname $(realpath "$0"))
 else
-  echo "\033[1;31mError:\nThe realpath command was not found, please install it.\033[0m"
-  echo "If you are under macOS, please try to install coreutils with homebrew."
+  echox "\033[1;31mError: The realpath command was not found, please install it.\033[0m"
+  echox "\033[1;32mIf you are under macOS, please try to install coreutils with homebrew.\033[0m"
   exit
 fi
 
 if [ -z "$BASE_DIR" ]; then
-  echo "\033[1;31mError:\nCannot locate the directory where I (the bash script file) live.\033[0m"
-  echo "Something wrong, please contact your system administrator."
+  echox "\033[1;31mError: Cannot locate the directory where I (the bash script file) live.\033[0m"
   exit
 fi
 
 if [ ! -f $BASE_DIR/$CONFIG_FILE_NAME ]; then
-  echo "\033[1;31mError:\nCannot locate configuration file!\033[0m"
-  echo "Please make sure such file exists:"
-  echo "$BASE_DIR/$CONFIG_FILE_NAME"
-  echo "\n\033[1;34mHINT:\033[0m
-  #You need to define variables in $CONFIG_FILE_NAME
-  #Here is an example:
-
-  APPLICATION_DISPLAY_NAME=\"Augwit Example Java Application\"
-  JAR_FILE_NAME=\"hello-world-0.0.1-SNAPSHOT.jar\"
-  JAVA_COMMAND_ARGS=\"example-arg1 example-arg2\"
-  LOG_OUTPUT_FILE_NAME=\"hello-world.log\"
+  echox "\033[1;31mError: Cannot locate such configuration file:"
+  echox "$BASE_DIR/$CONFIG_FILE_NAME\033[0m"
+  echox "\n\033[1;32m#You need to define variables in $CONFIG_FILE_NAME
+  \n#Here is an example:\033[0m"
+  echo "APPLICATION_DISPLAY_NAME=\"Augwit Example Java Application\"
+JAR_FILE_NAME=\"hello-world-0.0.1-SNAPSHOT.jar\"
+JAVA_COMMAND_ARGS=\"example-arg1 example-arg2\"
+LOG_OUTPUT_FILE_NAME=\"hello-world.log\"
   "
   exit
 fi
@@ -47,6 +51,12 @@ fi
 source $BASE_DIR/$CONFIG_FILE_NAME
 
 PATH_TO_JAR=$BASE_DIR/$JAR_FILE_NAME
+
+if [ ! -f $PATH_TO_JAR ]; then
+  echox "\033[1;31mError: Cannot locate java application:"
+  echox "$PATH_TO_JAR\033[0m"
+  exit
+fi
 
 start_jar()
 {
