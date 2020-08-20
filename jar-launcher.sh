@@ -7,28 +7,44 @@
 #note     :Bash script to start, stop or restart a java application.
 #===================================================================
 
-#Please Change below variables according to your project situation:
-APPLICATION_DISPLAY_NAME="Augwit Example Java Application"
-JAR_FILE_NAME="hello-world-0.0.1-SNAPSHOT.jar"
-JAVA_COMMAND_ARGS="example-arg1 example-arg2"
-LOG_OUTPUT_FILE_NAME="hello-world.log"
+CONFIG_FILE_NAME="jar-launcher.conf"
+#You can change the config file name if you want.
+#But in most cases, you don't need to do that.
 
-#Please don't change below lines.
-#================================
+#Please don't change this file.
+
 if command -v realpath &> /dev/null
 then
   BASE_DIR=$(dirname $(realpath "$0"))
 else
-  echo "The realpath command was not found, please install it."
+  echo "\033[1;31mError:\nThe realpath command was not found, please install it.\033[0m"
   echo "If you are under macOS, please try to install coreutils with homebrew."
   exit
 fi
 
 if [ -z "$BASE_DIR" ]; then
-  echo "Cannot locate file $JAR_FILE_NAME under the same directory where I (the bash script file) live."
-  echo "Please make sure the file exists or the file name is correct."
+  echo "\033[1;31mError:\nCannot locate the directory where I (the bash script file) live.\033[0m"
+  echo "Something wrong, please contact your system administrator."
   exit
 fi
+
+if [ ! -f $BASE_DIR/$CONFIG_FILE_NAME ]; then
+  echo "\033[1;31mError:\nCannot locate configuration file!\033[0m"
+  echo "Please make sure such file exists:"
+  echo "$BASE_DIR/$CONFIG_FILE_NAME"
+  echo "\n\033[1;34mHINT:\033[0m
+  #You need to define variables in $CONFIG_FILE_NAME
+  #Here is an example:
+
+  APPLICATION_DISPLAY_NAME=\"Augwit Example Java Application\"
+  JAR_FILE_NAME=\"hello-world-0.0.1-SNAPSHOT.jar\"
+  JAVA_COMMAND_ARGS=\"example-arg1 example-arg2\"
+  LOG_OUTPUT_FILE_NAME=\"hello-world.log\"
+  "
+  exit
+fi
+
+source $BASE_DIR/$CONFIG_FILE_NAME
 
 PATH_TO_JAR=$BASE_DIR/$JAR_FILE_NAME
 
