@@ -163,7 +163,7 @@ start_jar()
   fi
 
   echo "Starting $APPLICATION_DISPLAY_NAME ..."
-  nohup $JAVACMD -jar $PATH_TO_JAR $JAVA_COMMAND_ARGS >> $BASE_DIR/$LOG_OUTPUT_FILE_NAME &
+  nohup $JAVACMD $JAVA_COMMAND_OPTIONS -jar $PATH_TO_JAR $JAVA_COMMAND_ARGS >> $BASE_DIR/$LOG_OUTPUT_FILE_NAME &
     PID=$(echo $!)
   sleep 1
   PID=$(ps -ef | grep $PATH_TO_JAR | grep -v 'grep' | awk '{print $2}')
@@ -183,7 +183,11 @@ stop_jar()
     kill $PID
     PID=NULL
     sleep 1
-    echo "$APPLICATION_DISPLAY_NAME stopped."
+    if [ $? -ne 0 ]; then
+      echox "Failed to stop $APPLICATION_DISPLAY_NAME."
+    else
+      echo "$APPLICATION_DISPLAY_NAME stopped."
+    fi
   else
     echo "$APPLICATION_DISPLAY_NAME is not running."
   fi
