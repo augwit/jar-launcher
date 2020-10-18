@@ -163,7 +163,7 @@ start_jar()
   fi
 
   echo "Starting $APPLICATION_DISPLAY_NAME ..."
-  nohup $JAVACMD $JAVA_COMMAND_OPTIONS -jar $PATH_TO_JAR $JAVA_COMMAND_ARGS >> $BASE_DIR/$LOG_OUTPUT_FILE_NAME &
+  nohup $JAVACMD $JAVA_COMMAND_OPTIONS -jar $PATH_TO_JAR $JAVA_COMMAND_ARGS > $BASE_DIR/$LOG_OUTPUT_FILE_NAME &
     PID=$(echo $!)
   sleep 1
   PID=$(ps -ef | grep $PATH_TO_JAR | grep -v 'grep' | awk '{print $2}')
