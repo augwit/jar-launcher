@@ -1,10 +1,10 @@
 #!/bin/sh
 #==============================================================================
-# company  :Augwit
+# company  :Augwit Information Technology
 # author   :Benjamin Qin
 # email    :benjamin.qin@augwit.com
-# desc     :start, stop or restart a jar/war application.
-# usage    :bash jar-launcher.sh (start | stop | restart)
+# desc     :start, stop or restart a jar/war application, or install as a service
+# usage    :bash jar-launcher.sh (start | stop | restart | install)
 #
 # Required ENV vars:
 # ------------------
@@ -182,7 +182,7 @@ stop_jar()
     echo "$APPLICATION_DISPLAY_NAME in process $PID stopping ..."
     kill $PID
     PID=NULL
-    sleep 1
+    sleep 2
     if [ $? -ne 0 ]; then
       echox "Failed to stop $APPLICATION_DISPLAY_NAME."
     else
@@ -191,6 +191,40 @@ stop_jar()
   else
     echo "$APPLICATION_DISPLAY_NAME is not running."
   fi
+}
+
+install_service()
+{
+  if [ -z "$SERVICE_NAME" ] ; then
+    echox "Cannot install as service. SERVICE_NAME not defined."
+    exit 7
+  fi
+
+  if [ -f "/usr/lib/systemd/system/$SERVICE_NAME.service" ] ; then
+    echox "Service $SERVICE_NAME already exists. Installation aborted."
+    exit 8
+  fi
+
+  LAUNCHER_FILE_NAME=$(basename "$0")
+
+  echo "[Unit]
+Description=$APPLICATION_DISPLAY_NAME
+After=syslog.target network.target remote-fs.target nss-lookup.target
+
+[Service]
+Type=forking
+Environment=\"JAVA_HOME=$JAVA_HOME\"
+ExecStart=/usr/bin/bash $BASE_DIR/$LAUNCHER_FILE_NAME start
+ExecStop=/usr/bin/bash $BASE_DIR/$LAUNCHER_FILE_NAME stop
+PrivateTmp=true
+ 
+[Install]
+WantedBy=multi-user.target
+" >> /usr/lib/systemd/system/$SERVICE_NAME.service
+
+  echo "Service installed. Now enable service and start it."
+  systemctl enable $SERVICE_NAME
+  systemctl start $SERVICE_NAME
 }
 
 case $1 in
@@ -204,5 +238,8 @@ case $1 in
     stop_jar
     sleep 1
     start_jar
+  ;;
+  install)
+    install_service
   ;;
  esac
