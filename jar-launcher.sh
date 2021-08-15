@@ -65,6 +65,8 @@ if [ ! -f $PATH_TO_JAR ]; then
   echox "\033[1;31mError: Cannot locate java application:" >&2
   echox "$PATH_TO_JAR\033[0m" >&2
   exit 5
+else
+  echox "Jar file: $PATH_TO_JAR\033[0m"
 fi
 
 start_jar()
