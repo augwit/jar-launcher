@@ -219,6 +219,7 @@ Description=$APPLICATION_DISPLAY_NAME
 After=syslog.target network.target remote-fs.target nss-lookup.target
 
 [Service]
+WorkingDirectory=$BASE_DIR
 Type=forking
 Environment=\"JAVA_HOME=$JAVA_HOME\"
 ExecStart=/usr/bin/bash $BASE_DIR/$LAUNCHER_FILE_NAME start
