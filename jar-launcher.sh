@@ -4,7 +4,8 @@
 # author   :Benjamin Qin
 # email    :benjamin.qin@augwit.com
 # desc     :start, stop or restart a jar/war application, or install as a service
-# usage    :bash jar-launcher.sh (start | stop | restart | install)
+# usage    :bash jar-launcher.sh (start | stop | restart | install) [-f]
+#           -f: force commnd, only apply to stop and restart
 #
 # Required ENV vars:
 # ------------------
@@ -187,8 +188,13 @@ stop_jar()
 {
   PID=$(ps -ef | grep $PATH_TO_JAR | grep -v 'grep' | awk '{print $2}')
   if [ ! -z $PID ]; then
-    echo "$APPLICATION_DISPLAY_NAME in process $PID stopping ..."
-    kill $PID
+    if [ $1 = "-f" ]; then
+      echo "$APPLICATION_DISPLAY_NAME in process $PID force stopping ..."
+      kill -9 $PID
+    else
+      echo "$APPLICATION_DISPLAY_NAME in process $PID stopping ..."
+      kill $PID
+    fi
     PID=NULL
     sleep 2
     if [ $? -ne 0 ]; then
@@ -241,10 +247,10 @@ case $1 in
     start_jar
   ;;
   stop)
-    stop_jar
+    stop_jar $2
   ;;
   restart)
-    stop_jar
+    stop_jar $2
     sleep 1
     start_jar
   ;;
