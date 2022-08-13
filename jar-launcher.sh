@@ -172,6 +172,7 @@ start_jar()
   echo "JDK path: $JAVACMD"
   echo "Jar file: $PATH_TO_JAR"
   echo "-----------------------------------------------"
+  cd $BASE_DIR
   nohup $JAVACMD $JAVA_COMMAND_OPTIONS -jar $PATH_TO_JAR $JAVA_COMMAND_ARGS > $BASE_DIR/$LOG_OUTPUT_FILE_NAME &
     PID=$(echo $!)
   sleep 1
