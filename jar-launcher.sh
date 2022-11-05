@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 #==============================================================================
 # company  :Augwit Information Technology
 # author   :Benjamin Qin
