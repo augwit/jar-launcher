@@ -4,7 +4,7 @@
 # author   :Benjamin Qin
 # email    :benjamin.qin@augwit.com
 # desc     :start, stop or restart a jar/war application, or install as a service
-# usage    :bash jar-launcher.sh (start | stop | restart | install) [-f]
+# usage    :bash jar-launcher.sh (start | stop | restart | install | remove) [-f]
 #           -f: force commnd, only apply to stop and restart
 #
 # Required ENV vars:
@@ -27,7 +27,7 @@ echox() {
 }
 
 if [[ $# -lt 1 ]] ; then
-  echo "USAGE: $0 (start | stop | restart)"
+  echo "USAGE: $0 (start | stop | restart | install | remove)"
   exit 1
 fi
 
@@ -210,6 +210,22 @@ stop_jar()
   fi
 }
 
+remove_service()
+{
+  if [ ! -f "/usr/lib/systemd/system/$SERVICE_NAME.service" ] ; then
+    echox "Service $SERVICE_NAME does not exist. Uninstallation aborted."
+    exit 8
+  fi
+
+  systemctl status $SERVICE_NAME
+  systemctl disable $SERVICE_NAME
+  rm -f /usr/lib/systemd/system/$SERVICE_NAME.service
+  systemctl daemon-reload
+  systemctl reset-failed
+  jps -l | grep $JAR_FILE_NAME
+  echo "Service $SERVICE_NAME is removed. The application might be still running, you can manually stop it if you want."
+}
+
 install_service()
 {
   if [ -z "$SERVICE_NAME" ] ; then
@@ -259,5 +275,8 @@ case $1 in
   ;;
   install)
     install_service
+  ;;
+  remove)
+    remove_service
   ;;
  esac
