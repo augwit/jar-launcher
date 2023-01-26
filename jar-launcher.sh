@@ -189,14 +189,12 @@ stop_jar()
 {
   PID=$(ps -ef | grep $PATH_TO_JAR | grep -v 'grep' | awk '{print $2}')
   if [ ! -z $PID ]; then
-    if [[ $# -ge 1 ]] ; then
-      if [ $1 = "-f" ]; then
-        echo "$APPLICATION_DISPLAY_NAME in process $PID force stopping ..."
-        kill -9 $PID
-      else
-        echo "$APPLICATION_DISPLAY_NAME in process $PID stopping ..."
-        kill $PID
-      fi
+    if [[ $# -ge 1 ]] && [ $1 = "-f" ] ; then
+      echo "$APPLICATION_DISPLAY_NAME in process $PID force stopping ..."
+      kill -9 $PID
+    else
+      echo "$APPLICATION_DISPLAY_NAME in process $PID stopping ..."
+      kill $PID
     fi
     PID=NULL
     sleep 2
