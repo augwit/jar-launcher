@@ -197,7 +197,7 @@ stop_jar()
       kill $PID
     fi
     PID=NULL
-    sleep 2
+    sleep 6 
     if [ $? -ne 0 ]; then
       echox "Failed to stop $APPLICATION_DISPLAY_NAME."
     else
@@ -268,7 +268,7 @@ case $1 in
   ;;
   restart)
     stop_jar $2
-    sleep 1
+    sleep 3
     start_jar
   ;;
   install)
