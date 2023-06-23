@@ -253,10 +253,6 @@ PrivateTmp=true
 [Install]
 WantedBy=multi-user.target
 " >> /usr/lib/systemd/system/$SERVICE_NAME.service
-
-  echo "Service installed. Now enable service and start it."
-  systemctl enable $SERVICE_NAME
-  systemctl start $SERVICE_NAME
 }
 
 case $1 in
@@ -273,6 +269,10 @@ case $1 in
   ;;
   install)
     install_service
+    sleep 1
+    echo "Service installed. Now enable service and start it."
+    systemctl enable $SERVICE_NAME
+    systemctl start $SERVICE_NAME
   ;;
   remove)
     remove_service
