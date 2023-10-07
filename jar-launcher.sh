@@ -195,14 +195,29 @@ stop_jar()
     else
       echo "$APPLICATION_DISPLAY_NAME in process $PID stopping ..."
       kill $PID
+
+      # Wait for up to 30 seconds for the process to stop gracefully
+      for i in {1..30}; do
+        sleep 1
+        if ! ps -p $PID > /dev/null; then
+          break
+        fi
+        # If still running after 30 seconds, force kill
+        if [ $i -eq 30 ]; then
+          echo "$APPLICATION_DISPLAY_NAME in process $PID did not stop gracefully. Force stopping ..."
+          kill -9 $PID
+        fi
+      done
     fi
-    PID=NULL
-    sleep 6 
-    if [ $? -ne 0 ]; then
+
+    # Check if process is still running
+    if ps -p $PID > /dev/null; then
       echox "Failed to stop $APPLICATION_DISPLAY_NAME."
     else
       echo "$APPLICATION_DISPLAY_NAME stopped."
     fi
+
+    # PID=NULL
   else
     echo "$APPLICATION_DISPLAY_NAME is not running."
   fi
@@ -264,7 +279,6 @@ case $1 in
   ;;
   restart)
     stop_jar $2
-    sleep 3
     start_jar
   ;;
   install)
