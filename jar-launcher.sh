@@ -165,7 +165,7 @@ start_jar()
       JAVA_HOME=`cygpath --path --windows "$JAVA_HOME"`
   fi
 
-  echo "-----------------------------------------------"
+  echo "-----------------------------------------------------------"
   echo "Starting $APPLICATION_DISPLAY_NAME ..."
   echo "-----------------------------------------------"
   $JAVACMD -version
@@ -183,12 +183,14 @@ start_jar()
     echox "\033[1;31mSomething wrong when trying to start $APPLICATION_DISPLAY_NAME !\033[0m"
     exit 6
   fi
+  echo "-----------------------------------------------------------"
 }
 
 stop_jar()
 {
   PID=$(ps -ef | grep $PATH_TO_JAR | grep -v 'grep' | awk '{print $2}')
   if [ ! -z $PID ]; then
+    echo "-----------------------------------------------------------"
     if [[ $# -ge 1 ]] && [ $1 = "-f" ] ; then
       echo "$APPLICATION_DISPLAY_NAME in process $PID force stopping ..."
       kill -9 $PID
@@ -218,6 +220,7 @@ stop_jar()
     fi
 
     # PID=NULL
+    echo "-----------------------------------------------------------"
   else
     echo "$APPLICATION_DISPLAY_NAME is not running."
   fi
