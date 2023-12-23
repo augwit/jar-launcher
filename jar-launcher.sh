@@ -66,8 +66,6 @@ if [ ! -f $PATH_TO_JAR ]; then
   echox "\033[1;31mError: Cannot locate java application:" >&2
   echox "$PATH_TO_JAR\033[0m" >&2
   exit 5
-else
-  echox "Jar file: $PATH_TO_JAR\033[0m"
 fi
 
 start_jar()
@@ -75,6 +73,7 @@ start_jar()
   PID=$(ps -ef | grep $PATH_TO_JAR | grep -v 'grep' | awk '{print $2}')
   if [ ! -z "$PID" ]; then
     echo "$APPLICATION_DISPLAY_NAME is already running in process $PID."
+    echox "Jar file: $PATH_TO_JAR\033[0m"
     exit
   fi
 
@@ -194,9 +193,11 @@ stop_jar()
     if [[ $# -ge 1 ]] && [ $1 = "-f" ] ; then
       echo "$APPLICATION_DISPLAY_NAME in process $PID force stopping ..."
       kill -9 $PID
+      echox "Jar file: $PATH_TO_JAR\033[0m"
     else
       echo "$APPLICATION_DISPLAY_NAME in process $PID stopping ..."
       kill $PID
+      echox "Jar file: $PATH_TO_JAR\033[0m"
 
       # Wait for up to 30 seconds for the process to stop gracefully
       for i in {1..30}; do
@@ -258,7 +259,7 @@ install_service()
 
   echo "[Unit]
 Description=$APPLICATION_DISPLAY_NAME
-After=syslog.target network.target remote-fs.target nss-lookup.target
+After=syslog.target network.target remote-fs.target nss-lookup.target docker.service
 
 [Service]
 WorkingDirectory=$BASE_DIR
@@ -282,6 +283,9 @@ case $1 in
   ;;
   restart)
     stop_jar $2
+    echo "."
+    echo ".."
+    echo "..."
     start_jar
   ;;
   install)
