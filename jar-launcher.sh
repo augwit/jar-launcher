@@ -172,7 +172,7 @@ start_jar()
   echo "Jar file: $PATH_TO_JAR"
   echo "-----------------------------------------------"
   cd $BASE_DIR
-  nohup $JAVACMD $JAVA_COMMAND_OPTIONS -jar $PATH_TO_JAR $JAVA_COMMAND_ARGS > $BASE_DIR/$LOG_OUTPUT_FILE_NAME &
+  nohup $JAVACMD $JAVA_COMMAND_OPTIONS -jar $PATH_TO_JAR $JAVA_COMMAND_ARGS > /dev/null 2>> $BASE_DIR/$LOG_OUTPUT_FILE_NAME &
     PID=$(echo $!)
   sleep 1
   PID=$(ps -ef | grep $PATH_TO_JAR | grep -v 'grep' | awk '{print $2}')
