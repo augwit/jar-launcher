@@ -290,10 +290,9 @@ case $1 in
   ;;
   install)
     install_service
-    sleep 1
-    echo "Service installed. Now enable service and start it."
     systemctl enable $SERVICE_NAME
-    systemctl start $SERVICE_NAME
+    echo "Service was installed and enabled. Now you can run below command to start it:"
+    echo "systemctl start $SERVICE_NAME"
   ;;
   remove)
     remove_service
