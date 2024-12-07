@@ -3,11 +3,11 @@
 # company  :Augwit Information Technology
 # author   :Benjamin Qin
 # email    :benjamin.qin@augwit.com
-# desc     :start, stop or restart a jar/war application, or install/uninstall as a service
-# usage    :bash jar-launcher.sh (start | stop | restart | install | uninstall) [-f]
-#           -f: force commnd, only apply to stop and restart
+# desc     :start, stop or restart a jar application, or install/uninstall as a service
+# usage    :bash jar-launcher.sh (init [-f] | start | stop [-f] | restart [-f] | install | uninstall)
+#           -f: force commnd, only apply to init, stop and restart
 #
-# Required ENV vars:
+# Required ENV varibles:
 # ------------------
 #   JAVA_HOME - location of a JDK home dir
 #
@@ -27,10 +27,12 @@ echox() {
 }
 
 if [[ $# -lt 1 ]] ; then
-  echo "USAGE: $0 (start | stop | restart | install | uninstall)"
+  echo "USAGE:"
+  echo "$0 (init [-f] | start | stop [-f] | restart [-f] | install | uninstall)"
   exit 1
 fi
 
+#Find the directory where I (the bash script file) live
 if command -v realpath &> /dev/null
 then
   BASE_DIR=$(dirname $(realpath "$0"))
@@ -45,16 +47,73 @@ if [ -z "$BASE_DIR" ]; then
   exit 3
 fi
 
+init_config() {
+  local overwrite=false
+  if [[ $# -ge 1 ]] && [ $1 = "-f" ] ; then
+    overwrite=true
+  fi
+
+  if [ -f $BASE_DIR/$CONFIG_FILE_NAME ] && ! $overwrite; then
+    echox "\033[1;31mConfig file already exists:\033[0m"  >&2
+    echox "\033[1;31m$BASE_DIR/$CONFIG_FILE_NAME\033[0m"  >&2
+    echox "\033[1;31mUse -f to overwrite it if you want.\033[0m"  >&2
+    exit 1
+  else
+    if $overwrite; then
+      echox "Overwriting existing config file:"  >&2
+      echox "$BASE_DIR/$CONFIG_FILE_NAME"  >&2
+      rm -f $BASE_DIR/$CONFIG_FILE_NAME
+    else
+      echox "Creating default config file:"  >&2
+      echox "$BASE_DIR/$CONFIG_FILE_NAME"  >&2
+    fi
+
+    JAR_FILE_NAME=$(ls *.jar 2>/dev/null | head -1)
+    if [ -z "$JAR_FILE_NAME" ]; then
+      echox "\033[1;31mError: No jar file found in current directory.\033[0m"  >&2
+      echox "I will generate a sample config file for you."  >&2
+      JAR_FILE_NAME="hello-world.jar"
+    else
+      JAR_FILES_FOUND=$(ls *.jar 2>/dev/null | wc -l)
+      if [ $JAR_FILES_FOUND -gt 1 ]; then
+        echox "Found $JAR_FILES_FOUND jar files in current directory:"  >&2
+        ls *.jar 2>/dev/null | awk '{print NR, $0}' | while read i jar; do
+          echox "  $i. $jar"
+        done
+        read -p "Please enter the number of the jar file, press enter to confirm: " choice
+        JAR_FILE_NAME=$(ls *.jar 2>/dev/null | head -n $choice | tail -1)
+      fi
+    fi
+
+    APPLICATION_DISPLAY_NAME=$(echo $JAR_FILE_NAME | sed 's/\.[^.]*$//')
+    SERVICE_NAME=$(echo $APPLICATION_DISPLAY_NAME | sed -E 's/(-[0-9.]+(-[a-zA-Z]+)*(\.[0-9]+)*)?(\.jar)?$//')
+
+    echo "# Please Change below variables according to your project situation:" >> $BASE_DIR/$CONFIG_FILE_NAME
+    echo "# You can change this to a more user friendly name" >> $BASE_DIR/$CONFIG_FILE_NAME
+    echo "APPLICATION_DISPLAY_NAME=\"$APPLICATION_DISPLAY_NAME\"" >> $BASE_DIR/$CONFIG_FILE_NAME
+    echo "# Options for JVM" >> $BASE_DIR/$CONFIG_FILE_NAME
+    echo "JAVA_COMMAND_OPTIONS=\"-Xms128m -Xmx128m\"" >> $BASE_DIR/$CONFIG_FILE_NAME
+    echo "# Name of the jar application file, without path" >> $BASE_DIR/$CONFIG_FILE_NAME
+    echo "JAR_FILE_NAME=\"$JAR_FILE_NAME\"" >> $BASE_DIR/$CONFIG_FILE_NAME
+    echo "# Arguments for the jar application" >> $BASE_DIR/$CONFIG_FILE_NAME
+    echo "JAVA_COMMAND_ARGS=\"\"" >> $BASE_DIR/$CONFIG_FILE_NAME
+    echo "# Log file only contains error messages by default" >> $BASE_DIR/$CONFIG_FILE_NAME
+    echo "LOG_OUTPUT_FILE_NAME=\"$APPLICATION_DISPLAY_NAME.log\"" >> $BASE_DIR/$CONFIG_FILE_NAME
+    echo "# Used to install service" >> $BASE_DIR/$CONFIG_FILE_NAME
+    echo "SERVICE_NAME=\"$SERVICE_NAME\"" >> $BASE_DIR/$CONFIG_FILE_NAME
+  fi
+}
+
+if [[ $# -ge 1 ]] && [ $1 = "init" ] ; then
+  init_config $2
+  exit 0
+fi
+
 if [ ! -f $BASE_DIR/$CONFIG_FILE_NAME ]; then
-  echox "\033[1;31mError: Cannot locate such configuration file:"  >&2
+  echox "\033[1;31mError: Cannot locate configuration file:"  >&2
   echox "$BASE_DIR/$CONFIG_FILE_NAME\033[0m"  >&2
-  echox "\n\033[1;32m#You need to define variables in $CONFIG_FILE_NAME
-  \n#Here is an example:\033[0m"
-  echo "APPLICATION_DISPLAY_NAME=\"Augwit Example Java Application\"
-JAR_FILE_NAME=\"hello-world-0.0.1-SNAPSHOT.jar\"
-JAVA_COMMAND_ARGS=\"example-arg1 example-arg2\"
-LOG_OUTPUT_FILE_NAME=\"hello-world.log\"
-  "
+  echox "\033[1;32mPlease run below command to create one:\033[0m"
+  echo "$0 init"
   exit 4
 fi
 
