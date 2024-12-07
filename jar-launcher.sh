@@ -64,14 +64,14 @@ init_config() {
       echox "$BASE_DIR/$CONFIG_FILE_NAME"  >&2
       rm -f $BASE_DIR/$CONFIG_FILE_NAME
     else
-      echox "Creating default config file:"  >&2
+      echox "Creating config file:"  >&2
       echox "$BASE_DIR/$CONFIG_FILE_NAME"  >&2
     fi
 
     JAR_FILE_NAME=$(ls *.jar 2>/dev/null | head -1)
     if [ -z "$JAR_FILE_NAME" ]; then
-      echox "\033[1;31mError: No jar file found in current directory.\033[0m"  >&2
-      echox "I will generate a sample config file for you."  >&2
+      echox "No jar file found in current directory."  >&2
+      echox "I will generate a default config file for you."  >&2
       JAR_FILE_NAME="hello-world.jar"
     else
       JAR_FILES_FOUND=$(ls *.jar 2>/dev/null | wc -l)
