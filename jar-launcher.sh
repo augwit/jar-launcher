@@ -113,10 +113,10 @@ if [[ $# -ge 1 ]] && [ $1 = "init" ] ; then
 fi
 
 if [ ! -f $BASE_DIR/$CONFIG_FILE_NAME ]; then
-  echox "\033[1;31mError: Cannot locate configuration file:"  >&2
-  echox "$BASE_DIR/$CONFIG_FILE_NAME\033[0m"  >&2
-  echox "\033[1;32mPlease run below command to create one:\033[0m"
-  echo "$0 init"
+  echox "\033[1;31mError: Cannot locate configuration file:\033[0m"  >&2
+  echox "\033[1;31mP$BASE_DIR/$CONFIG_FILE_NAME\033[0m"  >&2
+  echox "\033[1;31mPlease run below command to create one:\033[0m"
+  echox "\033[1;31m$0 init\033[0m"
   exit 4
 fi
 
@@ -125,8 +125,8 @@ source $BASE_DIR/$CONFIG_FILE_NAME
 PATH_TO_JAR=$BASE_DIR/$JAR_FILE_NAME
 
 if [ ! -f $PATH_TO_JAR ]; then
-  echox "\033[1;31mError: Cannot locate java application:" >&2
-  echox "$PATH_TO_JAR\033[0m" >&2
+  echox "\033[1;31mError: Cannot locate java application:\033[0m" >&2
+  echox "\033[1;31m$PATH_TO_JAR\033[0m" >&2
   exit 5
 fi
 
