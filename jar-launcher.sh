@@ -68,20 +68,23 @@ init_config() {
       echox "$BASE_DIR/$CONFIG_FILE_NAME"  >&2
     fi
 
-    JAR_FILE_NAME=$(ls *.jar 2>/dev/null | head -1)
+    JAR_FILE_NAME=$(ls $BASE_DIR/*.jar 2>/dev/null | head -1)
+    JAR_FILE_NAME=$(basename $JAR_FILE_NAME)
     if [ -z "$JAR_FILE_NAME" ]; then
       echox "No jar file found in current directory."  >&2
       echox "I will generate a default config file for you."  >&2
       JAR_FILE_NAME="hello-world.jar"
     else
-      JAR_FILES_FOUND=$(ls *.jar 2>/dev/null | wc -l)
+      JAR_FILES_FOUND=$(ls $BASE_DIR/*.jar 2>/dev/null | wc -l)
       if [ $JAR_FILES_FOUND -gt 1 ]; then
         echox "Found $JAR_FILES_FOUND jar files in current directory:"  >&2
-        ls *.jar 2>/dev/null | awk '{print NR, $0}' | while read i jar; do
+        ls $BASE_DIR/*.jar 2>/dev/null | awk '{print NR, $0}' | while read i jar; do
+          jar=$(basename $jar)
           echox "  $i. $jar"
         done
         read -p "Please enter the number of the jar file, press enter to confirm: " choice
-        JAR_FILE_NAME=$(ls *.jar 2>/dev/null | head -n $choice | tail -1)
+        JAR_FILE_NAME=$(ls $BASE_DIR/*.jar 2>/dev/null | head -n $choice | tail -1)
+        JAR_FILE_NAME=$(basename $JAR_FILE_NAME)
       fi
     fi
 
