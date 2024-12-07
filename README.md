@@ -30,7 +30,7 @@ jps -l
 
 ## Project Structure and Development
 
-### files besides jar-launcher.sh
+### Files besides jar-launcher.sh
 
 - jar-launcher.conf: The jar-launcher.conf is a configuration file containing application specific variables. You can generate a sample config file by running jar-launcher.sh init.
 
@@ -40,14 +40,21 @@ jps -l
 
 ### Run the example  
 To run the example hello-world-0.0.1-SNAPSHOT.jar file:  
+```shell
+bash jar-launcher.sh start
+```
+use jps to list your java processes.
+```shell
+jps -l
+```
 
-    bash jar-launcher.sh start
+Note the hello-world jar will run for 5 minutes then exit .  
 
-Check out the hello-world.log file, which contains the error log output of hello-world java application.
+Check out the hello-world-0.0.1-SNAPSHOT.log file, which contains the error log output of hello-world java application. It will be empty if there is no error.  
 
-Run with stop or restart subcommand to stop or restart the jar app.
+Run the stop or restart subcommand to stop or restart the jar app.  
 
-Note the hello-world jar app is a demo service, it will run for 5 minutes then exit unless you stop it manually.
+Run the install or uninstall subcommand to install or uninstall the jar app as a service.  
 
 ### Development
 Please submit pull requests to [https://github.com/augwit/jar-launcher](https://github.com/augwit/jar-launcher)
