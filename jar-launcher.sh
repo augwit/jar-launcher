@@ -3,13 +3,13 @@
 # company  :Augwit Information Technology
 # author   :Benjamin Qin
 # email    :benjamin.qin@augwit.com
-# desc     :start, stop or restart a jar application, or install/uninstall as a service
-# usage    :bash jar-launcher.sh (init [-f] | start | stop [-f] | restart [-f] | install | uninstall)
-#           -f: force commnd, only apply to init, stop and restart
+# desc     :start, stop or restart a jar application, show application status, or install/uninstall as a service
+# usage    :bash jar-launcher.sh (init [-f] | start | status | stop [-f] | restart [-f] | install | uninstall)
+#           -f: force execute the subcommnd, only apply to init, stop and restart
 #
 # Required ENV varibles:
 # ------------------
-#   JAVA_HOME - location of a JDK home dir
+#   JAVA_HOME - location of a JRE/JDK home directory
 #
 #==============================================================================
 
@@ -26,9 +26,13 @@ echox() {
   fi
 }
 
-if [[ $# -lt 1 ]] ; then
+show_usage() {
   echo "USAGE:"
-  echo "$0 (init [-f] | start | stop [-f] | restart [-f] | install | uninstall)"
+  echo "$0 (init [-f] | start | status | stop [-f] | restart [-f] | install | uninstall)"
+}
+
+if [[ $# -lt 1 ]] ; then
+  show_usage
   exit 1
 fi
 
@@ -130,15 +134,8 @@ if [ ! -f $PATH_TO_JAR ]; then
   exit 5
 fi
 
-start_jar()
+prepare_jre()
 {
-  PID=$(ps -ef | grep $PATH_TO_JAR | grep -v 'grep' | awk '{print $2}')
-  if [ ! -z "$PID" ]; then
-    echo "$APPLICATION_DISPLAY_NAME is already running in process $PID."
-    echox "Jar file: $PATH_TO_JAR\033[0m"
-    exit
-  fi
-
   # OS specific support.  $var _must_ be set to either true or false.
   cygwin=false;
   darwin=false;
@@ -225,13 +222,27 @@ start_jar()
     [ -n "$JAVA_HOME" ] &&
       JAVA_HOME=`cygpath --path --windows "$JAVA_HOME"`
   fi
+}
+
+start_jar()
+{
+  PID=$(ps -ef | grep $PATH_TO_JAR | grep -v 'grep' | awk '{print $2}')
+  if [ ! -z "$PID" ]; then
+    echo "$APPLICATION_DISPLAY_NAME is already running in process $PID."
+    echox "Jar file: $PATH_TO_JAR\033[0m"
+    exit
+  fi
+
+  prepare_jre
 
   echo "-----------------------------------------------------------"
   echo "Starting $APPLICATION_DISPLAY_NAME ..."
   echo "-----------------------------------------------"
+  echo "Jar File:"
+  echo "$PATH_TO_JAR"
+  echo "Java Path:"
+  echo "$JAVACMD"
   $JAVACMD -version
-  echo "JDK path: $JAVACMD"
-  echo "Jar file: $PATH_TO_JAR"
   echo "-----------------------------------------------"
   cd $BASE_DIR
   nohup $JAVACMD $JAVA_COMMAND_OPTIONS -jar $PATH_TO_JAR $JAVA_COMMAND_ARGS > /dev/null 2>> $BASE_DIR/$LOG_OUTPUT_FILE_NAME &
@@ -247,6 +258,25 @@ start_jar()
   echo "-----------------------------------------------------------"
 }
 
+show_jar_status()
+{
+  PID=$(ps -ef | grep $PATH_TO_JAR | grep -v 'grep' | awk '{print $2}')
+  echo "-----------------------------------------------------------"
+  if [ ! -z $PID ]; then
+    echo "$APPLICATION_DISPLAY_NAME is running in process $PID."
+  else
+    echo "$APPLICATION_DISPLAY_NAME is not running."
+  fi
+  echo "-----------------------------------------------"
+  echo "Jar File:"
+  echo "$PATH_TO_JAR"
+  prepare_jre
+  echo "Java Path:"
+  echo "$JAVACMD"
+  $JAVACMD -version
+  echo "-----------------------------------------------------------"
+}
+
 stop_jar()
 {
   PID=$(ps -ef | grep $PATH_TO_JAR | grep -v 'grep' | awk '{print $2}')
@@ -255,11 +285,17 @@ stop_jar()
     if [[ $# -ge 1 ]] && [ $1 = "-f" ] ; then
       echo "$APPLICATION_DISPLAY_NAME in process $PID force stopping ..."
       kill -9 $PID
-      echox "Jar file: $PATH_TO_JAR\033[0m"
+      echo "-----------------------------------------------"
+      echox "Jar File:"
+      echox "$PATH_TO_JAR"
+      echo "-----------------------------------------------"
     else
       echo "$APPLICATION_DISPLAY_NAME in process $PID stopping ..."
       kill $PID
-      echox "Jar file: $PATH_TO_JAR\033[0m"
+      echo "-----------------------------------------------"
+      echox "Jar File:"
+      echox "$PATH_TO_JAR"
+      echo "-----------------------------------------------"
 
       # Wait for up to 30 seconds for the process to stop gracefully
       for i in {1..30}; do
@@ -340,6 +376,9 @@ case $1 in
   start)
     start_jar
   ;;
+  status)
+    show_jar_status
+  ;;
   stop)
     stop_jar $2
   ;;
@@ -358,5 +397,10 @@ case $1 in
   ;;
   uninstall)
     uninstall_service
+  ;;
+  *)
+    echo "Unsupported subcommand: $1"
+    echo ""
+    show_usage
   ;;
  esac
