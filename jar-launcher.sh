@@ -1,10 +1,11 @@
 #!/bin/bash
+# filepath: /Users/benjamin/Code/augwit/dev-hero/jar-launcher/jar-launcher.sh
 #==============================================================================
 # company  :Augwit Information Technology
 # author   :Benjamin Qin
 # email    :benjamin.qin@augwit.com
-# desc     :start, stop or restart a jar application, show application status, or install/uninstall as a service
-# usage    :bash jar-launcher.sh (init [-f] | start | status | stop [-f] | restart [-f] | install | uninstall)
+# desc     :start, stop or restart a jar application, show application status, install/uninstall as a service, or upgrade the script itself.
+# usage    :bash jar-launcher.sh (init [-f] | start | status | stop [-f] | restart [-f] | install | uninstall | self-upgrade)
 #           -f: force execute the subcommnd, only apply to init, stop and restart
 #
 # Required ENV varibles:
@@ -28,7 +29,7 @@ echox() {
 
 show_usage() {
   echo "USAGE:"
-  echo "$0 (init [-f] | start | status | stop [-f] | restart [-f] | install | uninstall)"
+  echo "$0 (init [-f] | start | status | stop [-f] | restart [-f] | install | uninstall | self-upgrade)"
 }
 
 if [[ $# -lt 1 ]] ; then
@@ -235,15 +236,15 @@ start_jar()
 
   prepare_jre
 
-  echo "-----------------------------------------------------------"
+
   echo "Starting $APPLICATION_DISPLAY_NAME ..."
-  echo "-----------------------------------------------"
+  echo "-----------------------------------------------------------"
   echo "Jar File:"
   echo "$PATH_TO_JAR"
   echo "Java Path:"
   echo "$JAVACMD"
   $JAVACMD -version
-  echo "-----------------------------------------------"
+  echo "-----------------------------------------------------------"
   cd $BASE_DIR
   nohup $JAVACMD $JAVA_COMMAND_OPTIONS -jar $PATH_TO_JAR $JAVA_COMMAND_ARGS > /dev/null 2>> $BASE_DIR/$LOG_OUTPUT_FILE_NAME &
     PID=$(echo $!)
@@ -255,19 +256,18 @@ start_jar()
     echox "\033[1;31mSomething wrong when trying to start $APPLICATION_DISPLAY_NAME !\033[0m"
     exit 6
   fi
-  echo "-----------------------------------------------------------"
 }
 
 show_jar_status()
 {
   PID=$(ps -ef | grep $PATH_TO_JAR | grep -v 'grep' | awk '{print $2}')
-  echo "-----------------------------------------------------------"
+
   if [ ! -z $PID ]; then
     echo "$APPLICATION_DISPLAY_NAME is running in process $PID."
   else
     echo "$APPLICATION_DISPLAY_NAME is not running."
   fi
-  echo "-----------------------------------------------"
+  echo "-----------------------------------------------------------"
   echo "Jar File:"
   echo "$PATH_TO_JAR"
   prepare_jre
@@ -281,21 +281,20 @@ stop_jar()
 {
   PID=$(ps -ef | grep $PATH_TO_JAR | grep -v 'grep' | awk '{print $2}')
   if [ ! -z $PID ]; then
-    echo "-----------------------------------------------------------"
     if [[ $# -ge 1 ]] && [ $1 = "-f" ] ; then
       echo "$APPLICATION_DISPLAY_NAME in process $PID force stopping ..."
       kill -9 $PID
-      echo "-----------------------------------------------"
+      echo "-----------------------------------------------------------"
       echox "Jar File:"
       echox "$PATH_TO_JAR"
-      echo "-----------------------------------------------"
+      echo "-----------------------------------------------------------"
     else
       echo "$APPLICATION_DISPLAY_NAME in process $PID stopping ..."
       kill $PID
-      echo "-----------------------------------------------"
+      echo "-----------------------------------------------------------"
       echox "Jar File:"
       echox "$PATH_TO_JAR"
-      echo "-----------------------------------------------"
+      echo "-----------------------------------------------------------"
 
       # Wait for up to 30 seconds for the process to stop gracefully
       for i in {1..30}; do
@@ -319,7 +318,6 @@ stop_jar()
     fi
 
     # PID=NULL
-    echo "-----------------------------------------------------------"
   else
     echo "$APPLICATION_DISPLAY_NAME is not running."
   fi
@@ -372,6 +370,21 @@ WantedBy=multi-user.target
 " >> /usr/lib/systemd/system/$SERVICE_NAME.service
 }
 
+self_upgrade() {
+  echo "Performing self-upgrade..."
+    # Get the absolute path of the script
+  SCRIPT_PATH=$(realpath "$0")
+
+  # Download the latest version and replace the current script
+  curl -o "$SCRIPT_PATH" "https://raw.githubusercontent.com/augwit/jar-launcher/refs/heads/main/jar-launcher.sh"
+  if [ $? -eq 0 ]; then
+    chmod +x "$SCRIPT_PATH"
+    echo "Self-upgrade complete."
+  else
+    echo "Self-upgrade failed."
+  fi
+}
+
 case $1 in
   start)
     start_jar
@@ -398,9 +411,12 @@ case $1 in
   uninstall)
     uninstall_service
   ;;
+  self-upgrade)
+    self_upgrade
+  ;;
   *)
     echo "Unsupported subcommand: $1"
     echo ""
     show_usage
   ;;
- esac
+esac
