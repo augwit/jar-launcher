@@ -239,10 +239,8 @@ start_jar()
 
   echo "Starting $APPLICATION_DISPLAY_NAME ..."
   echo "-----------------------------------------------------------"
-  echo "Jar File:"
-  echo "$PATH_TO_JAR"
-  echo "Java Path:"
-  echo "$JAVACMD"
+  echo "Jar File: $PATH_TO_JAR"
+  echo "Java Path: $JAVACMD"
   $JAVACMD -version
   echo "-----------------------------------------------------------"
   cd $BASE_DIR
@@ -268,11 +266,9 @@ show_jar_status()
     echo "$APPLICATION_DISPLAY_NAME is not running."
   fi
   echo "-----------------------------------------------------------"
-  echo "Jar File:"
-  echo "$PATH_TO_JAR"
+  echo "Jar File: $PATH_TO_JAR"
   prepare_jre
-  echo "Java Path:"
-  echo "$JAVACMD"
+  echo "Java Path: $JAVACMD"
   $JAVACMD -version
   echo "-----------------------------------------------------------"
 }
@@ -285,15 +281,13 @@ stop_jar()
       echo "$APPLICATION_DISPLAY_NAME in process $PID force stopping ..."
       kill -9 $PID
       echo "-----------------------------------------------------------"
-      echox "Jar File:"
-      echox "$PATH_TO_JAR"
+      echox "Jar File: $PATH_TO_JAR"
       echo "-----------------------------------------------------------"
     else
       echo "$APPLICATION_DISPLAY_NAME in process $PID stopping ..."
       kill $PID
       echo "-----------------------------------------------------------"
-      echox "Jar File:"
-      echox "$PATH_TO_JAR"
+      echox "Jar File: $PATH_TO_JAR"
       echo "-----------------------------------------------------------"
 
       # Wait for up to 30 seconds for the process to stop gracefully
