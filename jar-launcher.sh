@@ -324,7 +324,6 @@ uninstall_service()
     exit 8
   fi
 
-  systemctl status $SERVICE_NAME
   systemctl disable $SERVICE_NAME
   rm -f /usr/lib/systemd/system/$SERVICE_NAME.service
   systemctl daemon-reload
