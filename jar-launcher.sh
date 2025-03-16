@@ -328,8 +328,13 @@ uninstall_service()
   rm -f /usr/lib/systemd/system/$SERVICE_NAME.service
   systemctl daemon-reload
   systemctl reset-failed
-  jps -l | grep $JAR_FILE_NAME
-  echo "Service $SERVICE_NAME is uninstalled. The application might be still running, you can manually stop it if you want."
+  echo "Service $SERVICE_NAME is uninstalled."
+  PID=$(ps -ef | grep $PATH_TO_JAR | grep -v 'grep' | awk '{print $2}')
+  if [ ! -z "$PID" ]; then
+    echo "The application is still running, you can manually stop it if you want."
+    jps -l | grep $JAR_FILE_NAME
+    exit
+  fi
 }
 
 install_service()
