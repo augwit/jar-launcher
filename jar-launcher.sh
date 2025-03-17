@@ -52,6 +52,26 @@ if [ -z "$BASE_DIR" ]; then
   exit 3
 fi
 
+self_upgrade() {
+  echo "Performing self-upgrade..."
+    # Get the absolute path of the script
+  SCRIPT_PATH=$(realpath "$0")
+
+  # Download the latest version and replace the current script
+  curl -o "$SCRIPT_PATH" "https://raw.githubusercontent.com/augwit/jar-launcher/refs/heads/main/jar-launcher.sh"
+  if [ $? -eq 0 ]; then
+    chmod +x "$SCRIPT_PATH"
+    echo "Self-upgrade complete."
+  else
+    echo "Self-upgrade failed."
+  fi
+}
+
+if [[ $# -ge 1 ]] && [ $1 = "self-upgrade" ] ; then
+  self_upgrade
+  exit 0
+fi
+
 init_config() {
   local overwrite=false
   if [[ $# -ge 1 ]] && [ $1 = "-f" ] ; then
@@ -119,9 +139,9 @@ fi
 
 if [ ! -f $BASE_DIR/$CONFIG_FILE_NAME ]; then
   echox "\033[1;31mError: Cannot locate configuration file:\033[0m"  >&2
-  echox "\033[1;31mP$BASE_DIR/$CONFIG_FILE_NAME\033[0m"  >&2
-  echox "\033[1;31mPlease run below command to create one:\033[0m"
-  echox "\033[1;31m$0 init\033[0m"
+  echox "\033[1;31m$BASE_DIR/$CONFIG_FILE_NAME\033[0m"  >&2
+  echox "\Please run below command to create one:"
+  echox "$0 init"
   exit 4
 fi
 
@@ -366,21 +386,6 @@ PrivateTmp=true
 [Install]
 WantedBy=multi-user.target
 " >> /usr/lib/systemd/system/$SERVICE_NAME.service
-}
-
-self_upgrade() {
-  echo "Performing self-upgrade..."
-    # Get the absolute path of the script
-  SCRIPT_PATH=$(realpath "$0")
-
-  # Download the latest version and replace the current script
-  curl -o "$SCRIPT_PATH" "https://raw.githubusercontent.com/augwit/jar-launcher/refs/heads/main/jar-launcher.sh"
-  if [ $? -eq 0 ]; then
-    chmod +x "$SCRIPT_PATH"
-    echo "Self-upgrade complete."
-  else
-    echo "Self-upgrade failed."
-  fi
 }
 
 case $1 in
