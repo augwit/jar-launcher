@@ -397,6 +397,7 @@ After=syslog.target network.target remote-fs.target nss-lookup.target docker.ser
 WorkingDirectory=$BASE_DIR
 Type=forking
 Environment=\"JAVA_HOME=$JAVA_HOME\"
+ExecStartPre=/bin/sleep 30
 ExecStart=/usr/bin/bash $BASE_DIR/$LAUNCHER_FILE_NAME start
 ExecStop=/usr/bin/bash $BASE_DIR/$LAUNCHER_FILE_NAME stop
 PrivateTmp=true
