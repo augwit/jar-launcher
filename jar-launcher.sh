@@ -76,40 +76,52 @@ init_config() {
   local overwrite=false
   if [[ $# -ge 1 ]] && [ $1 = "-f" ] ; then
     overwrite=true
+  elif [[ $# -ge 2 ]] && [ $2 = "-f" ] ; then
+    overwrite=true
   fi
 
   if [ -f $BASE_DIR/$CONFIG_FILE_NAME ] && ! $overwrite; then
-    echox "\033[1;31mConfig file already exists:\033[0m"  >&2
-    echox "\033[1;31m$BASE_DIR/$CONFIG_FILE_NAME\033[0m"  >&2
-    echox "\033[1;31mUse -f to overwrite it if you want.\033[0m"  >&2
+    echox "Config file already exists:"  >&2
+    echox "$BASE_DIR/$CONFIG_FILE_NAME"  >&2
+    echox "Use -f to overwrite it if you want."  >&2
     exit 1
   else
     if $overwrite; then
       echox "Overwriting existing config file:"  >&2
-      echox "$BASE_DIR/$CONFIG_FILE_NAME"  >&2
       rm -f $BASE_DIR/$CONFIG_FILE_NAME
     else
       echox "Creating config file:"  >&2
-      echox "$BASE_DIR/$CONFIG_FILE_NAME"  >&2
     fi
 
-    JAR_FILE_NAME=$(ls $BASE_DIR/*.jar 2>/dev/null | head -1)
-    JAR_FILE_NAME=$(basename $JAR_FILE_NAME)
-    if [ -z "$JAR_FILE_NAME" ]; then
-      echox "No jar file found in current directory."  >&2
-      echox "I will generate a default config file for you."  >&2
-      JAR_FILE_NAME="hello-world.jar"
+    # If an argument is supplied, take it as the jar file name
+    if [[ $# -ge 1 ]]  && [ $1 != "-f" ] ; then
+      JAR_FILE_NAME=$1
+    elif [[ $# -ge 2 ]]  && [ $1 = "-f" ] ; then
+      JAR_FILE_NAME=$2
     else
-      JAR_FILES_FOUND=$(ls $BASE_DIR/*.jar 2>/dev/null | wc -l)
-      if [ $JAR_FILES_FOUND -gt 1 ]; then
-        echox "Found $JAR_FILES_FOUND jar files in current directory:"  >&2
-        ls $BASE_DIR/*.jar 2>/dev/null | awk '{print NR, $0}' | while read i jar; do
-          jar=$(basename $jar)
-          echox "  $i. $jar"
-        done
-        read -p "Please enter the number of the jar file, press enter to confirm: " choice
-        JAR_FILE_NAME=$(ls $BASE_DIR/*.jar 2>/dev/null | head -n $choice | tail -1)
-        JAR_FILE_NAME=$(basename $JAR_FILE_NAME)
+      JAR_FILE_NAME=$(ls $BASE_DIR/*.jar 2>/dev/null | head -1)
+      JAR_FILE_NAME=$(basename $JAR_FILE_NAME)
+      if [ -z "$JAR_FILE_NAME" ]; then
+        echox "No jar file found in current directory."  >&2
+        echox "I will generate an example config for you, please feel free to edit it."  >&2
+        JAR_FILE_NAME="hello-world.jar"
+      else
+        JAR_FILES_FOUND=$(ls $BASE_DIR/*.jar 2>/dev/null | wc -l)
+        if [ $JAR_FILES_FOUND -gt 1 ]; then
+          echox "Found $JAR_FILES_FOUND jar files in current directory:"  >&2
+          ls $BASE_DIR/*.jar 2>/dev/null | awk '{print NR, $0}' | while read i jar; do
+            jar=$(basename $jar)
+            echox "  $i. $jar"
+          done
+          read -p "Please enter the number of the file, enter c to cancel, preess enter to confirm: " choice
+          if [ $choice = "c" ] ; then
+            echo "Operation canceled"
+            exit
+          else
+            JAR_FILE_NAME=$(ls $BASE_DIR/*.jar 2>/dev/null | head -n $choice | tail -1)
+            JAR_FILE_NAME=$(basename $JAR_FILE_NAME)
+          fi
+        fi
       fi
     fi
 
@@ -129,11 +141,17 @@ init_config() {
     echo "LOG_OUTPUT_FILE_NAME=\"$APPLICATION_DISPLAY_NAME.log\"" >> $BASE_DIR/$CONFIG_FILE_NAME
     echo "# Used to install service" >> $BASE_DIR/$CONFIG_FILE_NAME
     echo "SERVICE_NAME=\"$SERVICE_NAME\"" >> $BASE_DIR/$CONFIG_FILE_NAME
+
+    if $overwrite; then
+      echox "Config overwritten: $BASE_DIR/$CONFIG_FILE_NAME"  >&2
+    else
+      echox "Config created: $BASE_DIR/$CONFIG_FILE_NAME"  >&2
+    fi
   fi
 }
 
 if [[ $# -ge 1 ]] && [ $1 = "init" ] ; then
-  init_config $2
+  init_config $2 $3
   exit 0
 fi
 

@@ -15,6 +15,12 @@ chmod +x jar-launcher.sh
 ```shell
 ./jar-launcher.sh init
 ```
+If there is only one jar file in the current directory, the config will take the jar file, otherwise will list all the jar files for use to choose.
+You can supply an argument as the file name if the jar file does not exit yet.
+```shell
+./jar-launcher.sh init file-not-exist-yet.jar
+```
+If there is already a config file, you can use -f to overwrite the existing file.
 4. Edit the generated jar-launcher.conf if you want
 5. Run the jar application with start/stop/restart subcommand and check if it works. You can use jps -l to list your java processes.
 ```shell
