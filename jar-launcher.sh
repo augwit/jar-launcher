@@ -87,10 +87,7 @@ init_config() {
     exit 1
   else
     if $overwrite; then
-      echox "Overwriting existing config file:"  >&2
       rm -f $BASE_DIR/$CONFIG_FILE_NAME
-    else
-      echox "Creating config file:"  >&2
     fi
 
     # If an argument is supplied, take it as the jar file name
@@ -146,6 +143,10 @@ init_config() {
       echox "Config overwritten: $BASE_DIR/$CONFIG_FILE_NAME"  >&2
     else
       echox "Config created: $BASE_DIR/$CONFIG_FILE_NAME"  >&2
+    fi
+    if [ ! -f "$BASE_DIR/$JAR_FILE_NAME" ]; then
+      echo ""
+      echo "However, file \"$JAR_FILE_NAME\" does not exist yet, please make sure to deploy it later"
     fi
   fi
 }
